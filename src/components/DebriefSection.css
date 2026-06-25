@@ -172,3 +172,25 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+@media (max-width: 600px) {
+  .debrief-section {
+    padding: 1.25rem;
+  }
+
+  .debrief-rating-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .debrief-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel,
+  .btn-save-debrief {
+    width: 100%;
+    justify-content: center;
+  }
+}

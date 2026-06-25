@@ -101,3 +101,9 @@
   color: var(--accent);
   font-weight: 500;
 }
+
+@media (max-width: 640px) {
+  .plan-card {
+    padding: 1rem 1.125rem;
+  }
+}

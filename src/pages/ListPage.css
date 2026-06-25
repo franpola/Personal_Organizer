@@ -93,3 +93,32 @@
   font-weight: 500;
   font-size: 0.875rem;
 }
+
+@media (max-width: 640px) {
+  .list-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .list-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .filter-row::-webkit-scrollbar { display: none; }
+
+  .filter-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}

@@ -92,3 +92,22 @@
 .btn-create.event { background: var(--event); }
 .btn-create:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-create:hover:not(:disabled) { opacity: 0.88; }
+
+@media (max-width: 600px) {
+  .new-plan {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .type-toggle {
+    width: 100%;
+  }
+
+  .type-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}

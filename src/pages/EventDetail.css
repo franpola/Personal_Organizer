@@ -111,3 +111,26 @@
 }
 
 .maps-link:hover { text-decoration: underline; }
+
+@media (max-width: 680px) {
+  .event-detail {
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .event-body {
+    grid-template-columns: 1fr;
+  }
+
+  .event-map-col {
+    order: -1;
+  }
+
+  .event-header-main {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .info-block {
+    padding: 1.125rem;
+  }
+}

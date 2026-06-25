@@ -370,3 +370,55 @@
 }
 
 .locations-list h3 { font-size: 1rem; margin-bottom: 0.25rem; }
+
+@media (max-width: 640px) {
+  .trip-detail {
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .detail-header-main {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .detail-header-actions {
+    flex-direction: row;
+  }
+
+  .detail-tabs {
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .detail-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+
+  .overview-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-numbers {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .item-row {
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+
+  .item-right {
+    margin-left: auto;
+  }
+}
