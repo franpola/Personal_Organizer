@@ -1,0 +1,124 @@
+.home {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+}
+
+.home-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-text h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.hero-text h1 em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.hero-text p {
+  margin-top: 0.625rem;
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.hero-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.hero-btn:hover { opacity: 0.82; }
+
+.hero-btn.trip {
+  background: var(--sky);
+  color: white;
+}
+
+.hero-btn.event {
+  background: var(--event);
+  color: white;
+}
+
+.home-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  margin-bottom: 1rem;
+}
+
+.section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.section-dot.accent { background: var(--accent); }
+.section-dot.sky { background: var(--sky); }
+.section-dot.muted { background: var(--border-strong); }
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.debrief-nudge {
+  padding: 1.25rem 1.5rem;
+  background: var(--accent-light);
+  border-radius: var(--radius-md);
+  border: 1px solid #e0c4b8;
+}
+
+.debrief-nudge .section-title {
+  color: var(--accent);
+}
+
+.home-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--ink-soft);
+}
+
+.btn-inline {
+  color: var(--accent);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.see-all-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
