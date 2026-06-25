@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, Clock, Ticket, ExternalLink, Edit3, Trash2, Navigation } from 'lucide-react'
+import { ArrowLeft, MapPin, Clock, Ticket, ExternalLink, Edit3, Trash2, Navigation, FileText } from 'lucide-react'
 import { useEvents } from '../context/PlannerContext'
 import DebriefSection from '../components/DebriefSection'
 import { formatDate, isPast, CATEGORY_LABELS, CATEGORY_COLORS } from '../utils/helpers'
@@ -64,7 +64,7 @@ export default function EventDetail() {
               </div>
             </div>
 
-            {event.venue && (
+            {event.venue?.name && (
               <div className="info-row">
                 <MapPin size={15} strokeWidth={1.5} className="info-icon" />
                 <div>
@@ -106,6 +106,16 @@ export default function EventDetail() {
                 </div>
               </div>
             )}
+
+            {event.notes && (
+              <div className="info-row">
+                <FileText size={15} strokeWidth={1.5} className="info-icon" />
+                <div>
+                  <span className="info-label">Notas</span>
+                  <span className="info-value info-notes">{event.notes}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {past && (
@@ -118,7 +128,7 @@ export default function EventDetail() {
         </div>
 
         <div className="event-map-col">
-          {event.venue && (
+          {event.venue?.name && (
             <>
               <iframe
                 title="Mapa venue"

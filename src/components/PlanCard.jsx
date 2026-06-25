@@ -6,19 +6,12 @@ import './PlanCard.css'
 export default function PlanCard({ plan }) {
   const isTrip = plan.type === 'trip'
   const past = plan.status === 'past'
-  
-  const targetDate = isTrip ? plan.dates?.start : plan.date
-  const days = !past && targetDate ? daysUntil(targetDate) : null
+  const days = !past ? daysUntil(isTrip ? plan.dates?.start : plan.date) : null
+  const linkTo = isTrip ? `/trips/${plan.id}` : `/events/${plan.id}`
 
   const dateLabel = isTrip
-    ? (plan.dates?.start && plan.dates?.end 
-        ? `${formatDateShort(plan.dates.start)} → ${formatDateShort(plan.dates.end)}`
-        : 'Fechas no definidas')
-    : (plan.date 
-        ? `${formatDateShort(plan.date)}${plan.time ? ` · ${plan.time}` : ''}`
-        : 'Fecha no definida')
-
-  const linkTo = isTrip ? `/trips/${plan.id}` : `/events/${plan.id}`
+    ? `${formatDateShort(plan.dates?.start)} → ${formatDateShort(plan.dates?.end)}`
+    : `${formatDateShort(plan.date)}${plan.time ? ` · ${plan.time}` : ''}`
 
   return (
     <Link to={linkTo} className={`plan-card ${past ? 'past' : 'upcoming'}`}>

@@ -5,7 +5,7 @@ import { useTrips, useEvents } from '../context/PlannerContext'
 import { generateId, CATEGORY_LABELS } from '../utils/helpers'
 import './NewPlan.css'
 
-// ─── Entry point ────────────────────────────────────────────────────────────
+// ─── /new ────────────────────────────────────────────────────────────────────
 
 export default function NewPlan() {
   const navigate = useNavigate()
@@ -17,22 +17,14 @@ export default function NewPlan() {
     <main className="new-plan">
       <Link to="/" className="back-link"><ArrowLeft size={16} /> Inicio</Link>
       <h1>Nuevo plan</h1>
-
       <div className="type-toggle">
-        <button
-          className={`type-btn ${type === 'trip' ? 'active trip' : ''}`}
-          onClick={() => setType('trip')}
-        >
+        <button className={`type-btn ${type === 'trip' ? 'active trip' : ''}`} onClick={() => setType('trip')}>
           <Plane size={16} strokeWidth={1.5} /> Viaje
         </button>
-        <button
-          className={`type-btn ${type === 'event' ? 'active event' : ''}`}
-          onClick={() => setType('event')}
-        >
+        <button className={`type-btn ${type === 'event' ? 'active event' : ''}`} onClick={() => setType('event')}>
           <Ticket size={16} strokeWidth={1.5} /> Evento
         </button>
       </div>
-
       {type === 'trip'
         ? <TripForm navigate={navigate} />
         : <EventForm navigate={navigate} />
@@ -41,7 +33,7 @@ export default function NewPlan() {
   )
 }
 
-// ─── Edit wrappers (used by /trips/:id/edit and /events/:id/edit) ───────────
+// ─── /trips/:id/edit ─────────────────────────────────────────────────────────
 
 export function EditTrip() {
   const { id } = useParams()
@@ -65,6 +57,8 @@ export function EditTrip() {
   )
 }
 
+// ─── /events/:id/edit ────────────────────────────────────────────────────────
+
 export function EditEvent() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -87,7 +81,7 @@ export function EditEvent() {
   )
 }
 
-// ─── Trip form ───────────────────────────────────────────────────────────────
+// ─── TripForm ─────────────────────────────────────────────────────────────────
 
 function TripForm({ navigate, existing }) {
   const { addTrip, updateTrip } = useTrips()
@@ -98,13 +92,12 @@ function TripForm({ navigate, existing }) {
     destination:    existing?.destination ?? '',
     dateStart:      existing?.dates?.start ?? '',
     dateEnd:        existing?.dates?.end ?? '',
-    budgetTotal:    existing?.budget?.total ?? '',
+    budgetTotal:    String(existing?.budget?.total ?? ''),
     budgetCurrency: existing?.budget?.currency ?? 'EUR',
   })
 
   function submit() {
     if (!form.name || !form.destination) return
-
     if (isEdit) {
       updateTrip(existing.id, {
         name:        form.name,
@@ -133,19 +126,21 @@ function TripForm({ navigate, existing }) {
     }
   }
 
+  const set = (k) => (v) => setForm(f => ({ ...f, [k]: v }))
+
   return (
     <div className="plan-form">
-      <Field label="Nombre del viaje *" value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="Escapada a Berlín" />
-      <Field label="Destino *" value={form.destination} onChange={v => setForm({ ...form, destination: v })} placeholder="Berlín, Alemania" />
+      <Field label="Nombre del viaje *" value={form.name} onChange={set('name')} placeholder="Escapada a Berlín" />
+      <Field label="Destino *" value={form.destination} onChange={set('destination')} placeholder="Berlín, Alemania" />
       <div className="form-row">
-        <Field label="Fecha de salida" type="date" value={form.dateStart} onChange={v => setForm({ ...form, dateStart: v })} />
-        <Field label="Fecha de vuelta"  type="date" value={form.dateEnd}   onChange={v => setForm({ ...form, dateEnd: v })} />
+        <Field label="Fecha de salida" type="date" value={form.dateStart} onChange={set('dateStart')} />
+        <Field label="Fecha de vuelta" type="date" value={form.dateEnd}   onChange={set('dateEnd')} />
       </div>
       <div className="form-row">
-        <Field label="Presupuesto (€)" type="number" value={String(form.budgetTotal)} onChange={v => setForm({ ...form, budgetTotal: v })} placeholder="800" />
+        <Field label="Presupuesto (€)" type="number" value={form.budgetTotal} onChange={set('budgetTotal')} placeholder="800" />
         <div className="field">
           <label className="field-label-sm">Moneda</label>
-          <select value={form.budgetCurrency} onChange={e => setForm({ ...form, budgetCurrency: e.target.value })}>
+          <select value={form.budgetCurrency} onChange={e => set('budgetCurrency')(e.target.value)}>
             <option value="EUR">EUR</option>
             <option value="USD">USD</option>
             <option value="GBP">GBP</option>
@@ -160,7 +155,7 @@ function TripForm({ navigate, existing }) {
   )
 }
 
-// ─── Event form ───────────────────────────────────────────────────────────────
+// ─── EventForm ────────────────────────────────────────────────────────────────
 
 function EventForm({ navigate, existing }) {
   const { addEvent, updateEvent } = useEvents()
@@ -176,65 +171,63 @@ function EventForm({ navigate, existing }) {
     price:        existing?.price != null ? String(existing.price) : '',
     link:         existing?.link ?? '',
     howToGet:     existing?.howToGet ?? '',
+    notes:        existing?.notes ?? '',
   })
 
   function submit() {
     if (!form.name || !form.date) return
-
+    const payload = {
+      name:     form.name,
+      category: form.category,
+      date:     form.date,
+      time:     form.time,
+      venue:    { name: form.venueName, address: form.venueAddress },
+      price:    parseFloat(form.price) || 0,
+      link:     form.link,
+      howToGet: form.howToGet,
+      notes:    form.notes,
+    }
     if (isEdit) {
-      updateEvent(existing.id, {
-        name:     form.name,
-        category: form.category,
-        date:     form.date,
-        time:     form.time,
-        venue:    { name: form.venueName, address: form.venueAddress },
-        price:    parseFloat(form.price) || 0,
-        link:     form.link,
-        howToGet: form.howToGet,
-      })
+      updateEvent(existing.id, payload)
       navigate(`/events/${existing.id}`)
     } else {
       const event = {
-        id:       generateId('event'),
-        type:     'event',
-        name:     form.name,
-        category: form.category,
-        status:   'planned',
-        date:     form.date,
-        time:     form.time,
-        venue:    { name: form.venueName, address: form.venueAddress },
-        price:    parseFloat(form.price) || 0,
-        link:     form.link,
-        howToGet: form.howToGet,
-        debrief:  null,
+        ...payload,
+        id:      generateId('event'),
+        type:    'event',
+        status:  'planned',
+        debrief: null,
       }
       addEvent(event)
       navigate(`/events/${event.id}`)
     }
   }
 
+  const set = (k) => (v) => setForm(f => ({ ...f, [k]: v }))
+
   return (
     <div className="plan-form">
-      <Field label="Nombre del evento *" value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="Meetup de React Madrid" />
+      <Field label="Nombre del evento *" value={form.name} onChange={set('name')} placeholder="Meetup de React Madrid" />
       <div className="form-row">
         <div className="field">
           <label className="field-label-sm">Categoría</label>
-          <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+          <select value={form.category} onChange={e => set('category')(e.target.value)}>
             {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
           </select>
         </div>
-        <Field label="Precio (€)" type="number" value={form.price} onChange={v => setForm({ ...form, price: v })} placeholder="0 = Gratis" />
+        <Field label="Precio (€)" type="number" value={form.price} onChange={set('price')} placeholder="0 = Gratis" />
       </div>
       <div className="form-row">
-        <Field label="Fecha *" type="date" value={form.date} onChange={v => setForm({ ...form, date: v })} />
-        <Field label="Hora"    type="time" value={form.time} onChange={v => setForm({ ...form, time: v })} />
+        <Field label="Fecha *" type="date" value={form.date} onChange={set('date')} />
+        <Field label="Hora"    type="time" value={form.time} onChange={set('time')} />
       </div>
-      <Field label="Nombre del venue"  value={form.venueName}    onChange={v => setForm({ ...form, venueName: v })}    placeholder="La Sala Madrid" />
-      <Field label="Dirección"         value={form.venueAddress} onChange={v => setForm({ ...form, venueAddress: v })} placeholder="C/ Ejemplo 10, Madrid" />
-      <Field label="Cómo llegar"       value={form.howToGet}     onChange={v => setForm({ ...form, howToGet: v })}     placeholder="Metro Sol (L1, L2, L3). 3 min andando." />
-      <Field label="Link al evento"    value={form.link}         onChange={v => setForm({ ...form, link: v })}         placeholder="https://meetup.com/..." />
+      <Field label="Nombre del venue"  value={form.venueName}    onChange={set('venueName')}    placeholder="La Sala Madrid" />
+      <Field label="Dirección"         value={form.venueAddress} onChange={set('venueAddress')} placeholder="C/ Ejemplo 10, Madrid" />
+      <Field label="Cómo llegar"       value={form.howToGet}     onChange={set('howToGet')}     placeholder="Metro Sol (L1, L2, L3). 3 min andando." />
+      <Field label="Link al evento"    value={form.link}         onChange={set('link')}         placeholder="https://meetup.com/..." />
+      <TextArea label="Notas" value={form.notes} onChange={set('notes')} placeholder="Descripción del evento, qué esperar, qué llevar..." rows={5} />
       <button className="btn-create event" onClick={submit} disabled={!form.name || !form.date}>
         <Ticket size={16} strokeWidth={1.5} />
         {isEdit ? 'Guardar cambios' : 'Crear evento'}
@@ -243,7 +236,7 @@ function EventForm({ navigate, existing }) {
   )
 }
 
-// ─── Shared field ─────────────────────────────────────────────────────────────
+// ─── Field components ─────────────────────────────────────────────────────────
 
 function Field({ label, type = 'text', value, onChange, placeholder }) {
   return (
@@ -254,6 +247,34 @@ function Field({ label, type = 'text', value, onChange, placeholder }) {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
+      />
+    </div>
+  )
+}
+
+function TextArea({ label, value, onChange, placeholder, rows = 4 }) {
+  return (
+    <div className="field">
+      <label className="field-label-sm">{label}</label>
+      <textarea
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        style={{
+          padding: '0.6rem 0.875rem',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
+          background: 'var(--paper-card)',
+          color: 'var(--ink)',
+          resize: 'vertical',
+          lineHeight: '1.6',
+          transition: 'border-color 0.15s',
+          fontFamily: 'var(--font-body)',
+          fontSize: '0.9375rem',
+        }}
+        onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+        onBlur={e => e.target.style.borderColor = 'var(--border)'}
       />
     </div>
   )

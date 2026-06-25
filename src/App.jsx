@@ -6,7 +6,7 @@ import TripsPage from './pages/TripsPage'
 import EventsPage from './pages/EventsPage'
 import TripDetail from './pages/TripDetail'
 import EventDetail from './pages/EventDetail'
-import NewPlan from './pages/NewPlan'
+import NewPlan, { EditTrip, EditEvent } from './pages/NewPlan'
 
 export default function App() {
   return (
@@ -17,8 +17,10 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/trips" element={<TripsPage />} />
           <Route path="/trips/:id" element={<TripDetail />} />
+          <Route path="/trips/:id/edit" element={<EditTrip />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/events/:id/edit" element={<EditEvent />} />
           <Route path="/new" element={<NewPlan />} />
         </Routes>
       </BrowserRouter>

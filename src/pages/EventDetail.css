@@ -134,3 +134,8 @@
     padding: 1.125rem;
   }
 }
+
+.info-notes {
+  white-space: pre-wrap;
+  line-height: 1.65;
+}
