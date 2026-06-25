@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { ArrowLeft, Plane, Ticket } from 'lucide-react'
-import { useTrips, useEvents } from '../hooks/useStorage'
+import { useTrips, useEvents } from '../context/PlannerContext'
 import { generateId, CATEGORY_LABELS } from '../utils/helpers'
 import './NewPlan.css'
 

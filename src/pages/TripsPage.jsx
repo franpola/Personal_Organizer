@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import PlanCard from '../components/PlanCard'
-import { useTrips } from '../hooks/useStorage'
+import { useTrips } from '../context/PlannerContext'
 import { isPast } from '../utils/helpers'
 import './ListPage.css'
 

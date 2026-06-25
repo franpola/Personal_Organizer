@@ -1,6 +1,6 @@
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Clock, Ticket, ExternalLink, Edit3, Trash2, Navigation } from 'lucide-react'
-import { useEvents } from '../hooks/useStorage'
+import { useEvents } from '../context/PlannerContext'
 import DebriefSection from '../components/DebriefSection'
 import { formatDate, isPast, CATEGORY_LABELS, CATEGORY_COLORS } from '../utils/helpers'
 import './EventDetail.css'

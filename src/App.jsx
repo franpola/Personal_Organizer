@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { PlannerProvider } from './context/PlannerContext'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import TripsPage from './pages/TripsPage'
@@ -9,16 +10,18 @@ import NewPlan from './pages/NewPlan'
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/trips" element={<TripsPage />} />
-        <Route path="/trips/:id" element={<TripDetail />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/:id" element={<EventDetail />} />
-        <Route path="/new" element={<NewPlan />} />
-      </Routes>
-    </BrowserRouter>
+    <PlannerProvider>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/trips" element={<TripsPage />} />
+          <Route path="/trips/:id" element={<TripDetail />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/new" element={<NewPlan />} />
+        </Routes>
+      </BrowserRouter>
+    </PlannerProvider>
   )
 }

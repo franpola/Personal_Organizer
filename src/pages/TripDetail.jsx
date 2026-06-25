@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   ArrowLeft, Plane, Hotel, Wallet, MapPin, Plus, Trash2, Edit3, ExternalLink
 } from 'lucide-react'
-import { useTrips } from '../hooks/useStorage'
+import { useTrips } from '../context/PlannerContext'
 import DebriefSection from '../components/DebriefSection'
 import {
   formatDate, formatDateShort, tripDuration, totalExpenses,
