@@ -371,6 +371,38 @@
 
 .locations-list h3 { font-size: 1rem; margin-bottom: 0.25rem; }
 
+/* Transport mode selector */
+.mode-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.875rem;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  background: var(--paper-card);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.mode-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+
+.mode-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
 @media (max-width: 640px) {
   .trip-detail {
     padding: 1.25rem 1rem 3rem;
