@@ -70,6 +70,24 @@
   opacity: 0.85;
 }
 
+.btn-signout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  background: var(--paper-card);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-signout:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 @media (max-width: 600px) {
   .navbar {
     padding: 0 1rem;
