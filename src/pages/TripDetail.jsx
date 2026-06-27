@@ -77,6 +77,10 @@ export default function TripDetail() {
     updateTrip(id, { transport: transport.filter(t => t.id !== tid) })
   }
 
+  function updateTransportItem(tid, updates) {
+    updateTrip(id, { transport: transport.map(t => t.id === tid ? { ...t, ...updates } : t) })
+  }
+
   function addAccommodation(acc) {
     updateTrip(id, { accommodation: [...(trip.accommodation || []), { ...acc, id: generateId('a') }] })
   }
@@ -85,12 +89,20 @@ export default function TripDetail() {
     updateTrip(id, { accommodation: trip.accommodation.filter(a => a.id !== aid) })
   }
 
+  function updateAccommodationItem(aid, updates) {
+    updateTrip(id, { accommodation: trip.accommodation.map(a => a.id === aid ? { ...a, ...updates } : a) })
+  }
+
   function addExpense(exp) {
     updateTrip(id, { expenses: [...(trip.expenses || []), { ...exp, id: generateId('e') }] })
   }
 
   function removeExpense(eid) {
     updateTrip(id, { expenses: trip.expenses.filter(e => e.id !== eid) })
+  }
+
+  function updateExpenseItem(eid, updates) {
+    updateTrip(id, { expenses: trip.expenses.map(e => e.id === eid ? { ...e, ...updates } : e) })
   }
 
   function saveDebrief(debrief) {
@@ -133,10 +145,10 @@ export default function TripDetail() {
           <OverviewTab trip={trip} transport={transport} spent={spent} past={past} saveDebrief={saveDebrief} />
         )}
         {tab === 'transport' && (
-          <TransportTab transport={transport} onAdd={addTransport} onRemove={removeTransport} />
+          <TransportTab transport={transport} onAdd={addTransport} onRemove={removeTransport} onUpdate={updateTransportItem} />
         )}
         {tab === 'accommodation' && (
-          <AccommodationTab accommodation={trip.accommodation || []} onAdd={addAccommodation} onRemove={removeAccommodation} />
+          <AccommodationTab accommodation={trip.accommodation || []} onAdd={addAccommodation} onRemove={removeAccommodation} onUpdate={updateAccommodationItem} />
         )}
         {tab === 'budget' && (
           <BudgetTab
@@ -145,6 +157,7 @@ export default function TripDetail() {
             spent={spent}
             onAdd={addExpense}
             onRemove={removeExpense}
+            onUpdate={updateExpenseItem}
             onBudgetUpdate={(b) => updateTrip(id, { budget: { ...trip.budget, ...b } })}
           />
         )}
@@ -193,12 +206,15 @@ function OverviewTab({ trip, transport, spent, past, saveDebrief }) {
 
 // ─── Transport ────────────────────────────────────────────────────────────────
 
-function TransportTab({ transport, onAdd, onRemove }) {
+function TransportTab({ transport, onAdd, onRemove, onUpdate }) {
   const emptyForm = { mode: 'train', from: '', to: '', date: '', time: '', operator: '', price: '', confirmationCode: '' }
   const [form, setForm] = useState(emptyForm)
   const [adding, setAdding] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({})
 
   const currentMode = TRANSPORT_MODES.find(m => m.value === form.mode) || TRANSPORT_MODES[0]
+  const editMode = TRANSPORT_MODES.find(m => m.value === editForm.mode) || TRANSPORT_MODES[0]
 
   function submit() {
     if (!form.from || !form.to || !form.date) return
@@ -207,40 +223,44 @@ function TransportTab({ transport, onAdd, onRemove }) {
     setAdding(false)
   }
 
+  function startEdit(t) {
+    setEditingId(t.id)
+    setEditForm({ ...t, price: String(t.price || '') })
+  }
+
+  function saveEdit() {
+    onUpdate(editingId, { ...editForm, price: parseFloat(editForm.price) || 0 })
+    setEditingId(null)
+  }
+
   const set = (k) => (v) => setForm(f => ({ ...f, [k]: v }))
+  const setE = (k) => (v) => setEditForm(f => ({ ...f, [k]: v }))
 
   return (
     <div className="tab-content">
       <div className="tab-header-row">
         <h3>Transporte</h3>
-        <button className="btn-add" onClick={() => setAdding(true)}>
+        <button className="btn-add" onClick={() => { setAdding(true); setEditingId(null) }}>
           <Plus size={15} /> Añadir
         </button>
       </div>
 
       {adding && (
         <div className="form-card">
-          {/* Mode selector */}
           <div className="field">
             <label className="field-label-sm">Tipo de transporte</label>
             <div className="mode-selector">
               {TRANSPORT_MODES.map(m => {
                 const Icon = m.icon
                 return (
-                  <button
-                    key={m.value}
-                    className={`mode-btn ${form.mode === m.value ? 'active' : ''}`}
-                    onClick={() => setForm(f => ({ ...f, mode: m.value }))}
-                    type="button"
-                  >
-                    <Icon size={15} strokeWidth={1.5} />
-                    <span>{m.label}</span>
+                  <button key={m.value} className={`mode-btn ${form.mode === m.value ? 'active' : ''}`}
+                    onClick={() => setForm(f => ({ ...f, mode: m.value }))} type="button">
+                    <Icon size={15} strokeWidth={1.5} /><span>{m.label}</span>
                   </button>
                 )
               })}
             </div>
           </div>
-
           <div className="form-row">
             <Field label="Origen" value={form.from} onChange={set('from')} placeholder={currentMode.placeholder.from || 'Origen'} />
             <Field label="Destino" value={form.to} onChange={set('to')} placeholder={currentMode.placeholder.to || 'Destino'} />
@@ -250,12 +270,8 @@ function TransportTab({ transport, onAdd, onRemove }) {
             <Field label="Hora" type="time" value={form.time} onChange={set('time')} />
           </div>
           <div className="form-row">
-            <Field
-              label={form.mode === 'plane' ? 'Aerolínea' : form.mode === 'train' ? 'Operadora' : form.mode === 'bus' ? 'Compañía' : 'Operadora / plataforma'}
-              value={form.operator}
-              onChange={set('operator')}
-              placeholder={currentMode.placeholder.operator}
-            />
+            <Field label={form.mode === 'plane' ? 'Aerolínea' : form.mode === 'train' ? 'Operadora' : form.mode === 'bus' ? 'Compañía' : 'Operadora / plataforma'}
+              value={form.operator} onChange={set('operator')} placeholder={currentMode.placeholder.operator} />
             <Field label="Precio (€)" type="number" value={form.price} onChange={set('price')} placeholder="45" />
           </div>
           <Field label="Código / localizador" value={form.confirmationCode} onChange={set('confirmationCode')} placeholder={currentMode.placeholder.code || 'Opcional'} />
@@ -270,7 +286,42 @@ function TransportTab({ transport, onAdd, onRemove }) {
         {transport.length === 0 && !adding && (
           <p className="empty-msg">Sin transportes aún. Añade avión, tren, bus, coche compartido...</p>
         )}
-        {transport.map(t => (
+        {transport.map(t => editingId === t.id ? (
+          <div key={t.id} className="form-card">
+            <div className="field">
+              <label className="field-label-sm">Tipo de transporte</label>
+              <div className="mode-selector">
+                {TRANSPORT_MODES.map(m => {
+                  const Icon = m.icon
+                  return (
+                    <button key={m.value} className={`mode-btn ${editForm.mode === m.value ? 'active' : ''}`}
+                      onClick={() => setEditForm(f => ({ ...f, mode: m.value }))} type="button">
+                      <Icon size={15} strokeWidth={1.5} /><span>{m.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+            <div className="form-row">
+              <Field label="Origen" value={editForm.from} onChange={setE('from')} placeholder={editMode.placeholder.from || 'Origen'} />
+              <Field label="Destino" value={editForm.to} onChange={setE('to')} placeholder={editMode.placeholder.to || 'Destino'} />
+            </div>
+            <div className="form-row">
+              <Field label="Fecha" type="date" value={editForm.date} onChange={setE('date')} />
+              <Field label="Hora" type="time" value={editForm.time} onChange={setE('time')} />
+            </div>
+            <div className="form-row">
+              <Field label={editForm.mode === 'plane' ? 'Aerolínea' : editForm.mode === 'train' ? 'Operadora' : 'Compañía'}
+                value={editForm.operator} onChange={setE('operator')} placeholder={editMode.placeholder.operator} />
+              <Field label="Precio (€)" type="number" value={editForm.price} onChange={setE('price')} placeholder="45" />
+            </div>
+            <Field label="Código / localizador" value={editForm.confirmationCode} onChange={setE('confirmationCode')} placeholder="Opcional" />
+            <div className="form-actions">
+              <button className="btn-ghost" onClick={() => setEditingId(null)}>Cancelar</button>
+              <button className="btn-primary" onClick={saveEdit}>Guardar</button>
+            </div>
+          </div>
+        ) : (
           <div key={t.id} className="item-row">
             <span className="item-icon"><TransportIcon mode={t.mode} /></span>
             <div className="item-main">
@@ -285,6 +336,7 @@ function TransportTab({ transport, onAdd, onRemove }) {
             <div className="item-right">
               {t.price > 0 && <span className="item-price">{t.price}€</span>}
               {t.confirmationCode && <code className="item-code">{t.confirmationCode}</code>}
+              <button className="btn-edit-item" onClick={() => startEdit(t)}><Edit3 size={14} /></button>
               <button className="btn-remove" onClick={() => onRemove(t.id)}><Trash2 size={14} /></button>
             </div>
           </div>
@@ -296,22 +348,37 @@ function TransportTab({ transport, onAdd, onRemove }) {
 
 // ─── Accommodation ────────────────────────────────────────────────────────────
 
-function AccommodationTab({ accommodation, onAdd, onRemove }) {
-  const [form, setForm] = useState({ name: '', address: '', checkIn: '', checkOut: '', price: '', confirmationCode: '' })
+function AccommodationTab({ accommodation, onAdd, onRemove, onUpdate }) {
+  const emptyForm = { name: '', address: '', checkIn: '', checkOut: '', price: '', confirmationCode: '' }
+  const [form, setForm] = useState(emptyForm)
   const [adding, setAdding] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({})
 
   function submit() {
     if (!form.name || !form.checkIn) return
     onAdd({ ...form, price: parseFloat(form.price) || 0 })
-    setForm({ name: '', address: '', checkIn: '', checkOut: '', price: '', confirmationCode: '' })
+    setForm(emptyForm)
     setAdding(false)
   }
+
+  function startEdit(a) {
+    setEditingId(a.id)
+    setEditForm({ ...a, price: String(a.price || '') })
+  }
+
+  function saveEdit() {
+    onUpdate(editingId, { ...editForm, price: parseFloat(editForm.price) || 0 })
+    setEditingId(null)
+  }
+
+  const setE = (k) => (v) => setEditForm(f => ({ ...f, [k]: v }))
 
   return (
     <div className="tab-content">
       <div className="tab-header-row">
         <h3>Alojamiento</h3>
-        <button className="btn-add" onClick={() => setAdding(true)}>
+        <button className="btn-add" onClick={() => { setAdding(true); setEditingId(null) }}>
           <Plus size={15} /> Añadir
         </button>
       </div>
@@ -325,8 +392,8 @@ function AccommodationTab({ accommodation, onAdd, onRemove }) {
             <Field label="Check-out" type="date" value={form.checkOut} onChange={v => setForm({ ...form, checkOut: v })} />
           </div>
           <div className="form-row">
-            <Field label="Precio total (€)" type="number" value={form.price}            onChange={v => setForm({ ...form, price: v })}            placeholder="200" />
-            <Field label="Código reserva"                 value={form.confirmationCode} onChange={v => setForm({ ...form, confirmationCode: v })} placeholder="BK-12345" />
+            <Field label="Precio total (€)" type="number" value={form.price} onChange={v => setForm({ ...form, price: v })} placeholder="200" />
+            <Field label="Código reserva" value={form.confirmationCode} onChange={v => setForm({ ...form, confirmationCode: v })} placeholder="BK-12345" />
           </div>
           <div className="form-actions">
             <button className="btn-ghost" onClick={() => setAdding(false)}>Cancelar</button>
@@ -337,7 +404,24 @@ function AccommodationTab({ accommodation, onAdd, onRemove }) {
 
       <div className="items-list">
         {accommodation.length === 0 && !adding && <p className="empty-msg">Sin alojamiento aún.</p>}
-        {accommodation.map(a => (
+        {accommodation.map(a => editingId === a.id ? (
+          <div key={a.id} className="form-card">
+            <Field label="Nombre" value={editForm.name} onChange={setE('name')} placeholder="Hotel Roma" />
+            <Field label="Dirección" value={editForm.address} onChange={setE('address')} placeholder="Calle Mayor 1" />
+            <div className="form-row">
+              <Field label="Check-in"  type="date" value={editForm.checkIn}  onChange={setE('checkIn')} />
+              <Field label="Check-out" type="date" value={editForm.checkOut} onChange={setE('checkOut')} />
+            </div>
+            <div className="form-row">
+              <Field label="Precio total (€)" type="number" value={editForm.price} onChange={setE('price')} placeholder="200" />
+              <Field label="Código reserva" value={editForm.confirmationCode} onChange={setE('confirmationCode')} placeholder="BK-12345" />
+            </div>
+            <div className="form-actions">
+              <button className="btn-ghost" onClick={() => setEditingId(null)}>Cancelar</button>
+              <button className="btn-primary" onClick={saveEdit}>Guardar</button>
+            </div>
+          </div>
+        ) : (
           <div key={a.id} className="item-row">
             <Hotel size={16} strokeWidth={1.5} className="item-icon" />
             <div className="item-main">
@@ -350,6 +434,7 @@ function AccommodationTab({ accommodation, onAdd, onRemove }) {
             <div className="item-right">
               {a.price > 0 && <span className="item-price">{a.price}€</span>}
               {a.confirmationCode && <code className="item-code">{a.confirmationCode}</code>}
+              <button className="btn-edit-item" onClick={() => startEdit(a)}><Edit3 size={14} /></button>
               <button className="btn-remove" onClick={() => onRemove(a.id)}><Trash2 size={14} /></button>
             </div>
           </div>
@@ -361,9 +446,12 @@ function AccommodationTab({ accommodation, onAdd, onRemove }) {
 
 // ─── Budget ───────────────────────────────────────────────────────────────────
 
-function BudgetTab({ budget, expenses, spent, onAdd, onRemove, onBudgetUpdate }) {
-  const [form, setForm] = useState({ date: '', category: 'food', amount: '', description: '' })
+function BudgetTab({ budget, expenses, spent, onAdd, onRemove, onUpdate, onBudgetUpdate }) {
+  const emptyForm = { date: '', category: 'food', amount: '', description: '' }
+  const [form, setForm] = useState(emptyForm)
   const [adding, setAdding] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({})
   const [editingBudget, setEditingBudget] = useState(false)
   const [budgetVal, setBudgetVal] = useState(budget?.total || '')
 
@@ -372,9 +460,21 @@ function BudgetTab({ budget, expenses, spent, onAdd, onRemove, onBudgetUpdate })
   function submit() {
     if (!form.amount) return
     onAdd({ ...form, amount: parseFloat(form.amount) })
-    setForm({ date: '', category: 'food', amount: '', description: '' })
+    setForm(emptyForm)
     setAdding(false)
   }
+
+  function startEdit(e) {
+    setEditingId(e.id)
+    setEditForm({ ...e, amount: String(e.amount || '') })
+  }
+
+  function saveEdit() {
+    onUpdate(editingId, { ...editForm, amount: parseFloat(editForm.amount) || 0 })
+    setEditingId(null)
+  }
+
+  const setE = (k) => (v) => setEditForm(f => ({ ...f, [k]: v }))
 
   return (
     <div className="tab-content">
@@ -441,7 +541,29 @@ function BudgetTab({ budget, expenses, spent, onAdd, onRemove, onBudgetUpdate })
 
       <div className="items-list">
         {expenses.length === 0 && !adding && <p className="empty-msg">Sin gastos registrados.</p>}
-        {expenses.map(e => (
+        {expenses.map(e => editingId === e.id ? (
+          <div key={e.id} className="form-card">
+            <div className="form-row">
+              <Field label="Fecha" type="date" value={editForm.date} onChange={setE('date')} />
+              <div className="field">
+                <label className="field-label-sm">Categoría</label>
+                <select value={editForm.category} onChange={ev => setE('category')(ev.target.value)}>
+                  {Object.entries(EXPENSE_CATEGORIES).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="form-row">
+              <Field label="Importe (€)" type="number" value={editForm.amount} onChange={setE('amount')} placeholder="45" />
+              <Field label="Descripción" value={editForm.description} onChange={setE('description')} placeholder="Cena en..." />
+            </div>
+            <div className="form-actions">
+              <button className="btn-ghost" onClick={() => setEditingId(null)}>Cancelar</button>
+              <button className="btn-primary" onClick={saveEdit}>Guardar</button>
+            </div>
+          </div>
+        ) : (
           <div key={e.id} className="item-row">
             <Wallet size={16} strokeWidth={1.5} className="item-icon" />
             <div className="item-main">
@@ -450,6 +572,7 @@ function BudgetTab({ budget, expenses, spent, onAdd, onRemove, onBudgetUpdate })
             </div>
             <div className="item-right">
               <span className="item-price">{e.amount}€</span>
+              <button className="btn-edit-item" onClick={() => startEdit(e)}><Edit3 size={14} /></button>
               <button className="btn-remove" onClick={() => onRemove(e.id)}><Trash2 size={14} /></button>
             </div>
           </div>

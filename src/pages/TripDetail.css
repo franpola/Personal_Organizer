@@ -217,6 +217,15 @@
 
 .btn-remove:hover { color: var(--accent); }
 
+.btn-edit-item {
+  color: var(--ink-muted);
+  padding: 0.2rem;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.btn-edit-item:hover { color: var(--sky); }
+
 .empty-msg {
   color: var(--ink-muted);
   font-size: 0.875rem;
